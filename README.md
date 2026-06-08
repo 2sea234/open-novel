@@ -142,4 +142,4 @@ novel-user
 
 ## License
 
-暂未指定开源许可证。
+本项目使用 MIT License，详见 [LICENSE](LICENSE)。
