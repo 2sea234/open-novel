@@ -21,6 +21,12 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
     private static final String LOGIN_PATH = "/api/adminSystem/adminLogin";
     private final JwtUtil jwtUtil;
 
+
+    private boolean isProtectedAdminPath(String path) {
+        return path.startsWith("/api/adminSystem")
+                || path.startsWith("/api/admin");
+    }
+
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
@@ -32,7 +38,7 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
         }
 
         String path = request.getURI().getPath();
-        if (LOGIN_PATH.equals(path) || !path.startsWith("/api/adminSystem/")) {
+        if (LOGIN_PATH.equals(path) || !isProtectedAdminPath(path)) {
             return chain.filter(exchange);
         }
 
