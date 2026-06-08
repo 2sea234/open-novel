@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kxhy.admin.mapper.AdminUserMapper">
+
+    <select id="listAdminUser" resultType="com.kxhy.admin.domain.po.AdminUser">
+        select
+        id,
+        username,
+        nickname,
+        status,
+        is_deleted as isDeleted
+        from admin_user
+        where id = #{id}
+        and is_deleted = 0
+    </select>
+
+    <select id="countByUsername" resultType="java.lang.Integer">
+        select COUNT(*)
+        from admin_user
+        where username = #{username}
+        and is_deleted = 0
+    </select>
+
+    <insert id="insertAdminUser" parameterType="com.kxhy.admin.domain.po.AdminUser" useGeneratedKeys="true" keyProperty="id">
+
+        insert into admin_user(
+            username,
+            password,
+            nickname,
+            status,
+            create_by,
+            update_by
+        ) values (
+            #{username},
+            #{password},
+            #{nickname},
+            #{status},
+            #{createBy},
+            #{updateBy}
+        )
+
+    </insert>
+
+    <update id="updateAdminUser">
+        update admin_user
+        set
+            nickname = #{dto.nickname},
+            status = #{dto.status},
+            update_by = #{adminId},
+            update_time = NOW()
+        where
+            id = #{id}
+        and
+            is_deleted = 0
+    </update>
+
+    <update id="updateAdminUserStatus">
+        UPDATE admin_user
+        SET
+        status = #{status},
+        update_by = #{adminId},
+        update_time = NOW()
+        WHERE id = #{id}
+        AND is_deleted = 0
+    </update>
+
+    <update id="resetAdminUserPassword">
+        update admin_user
+        set
+            password = #{password},
+            update_by = #{adminId},
+            update_time = NOW()
+        where
+            id = #{id}
+        and
+            is_deleted = 0
+    </update>
+
+    <update id="deleteAdminUser">
+        update admin_user
+        set
+            is_deleted = 1,
+            update_by = #{adminId},
+            update_time = NOW()
+        where
+            id = #{id}
+        AND is_deleted = 0
+    </update>
+
+    <select id="countNormalUserById" resultType="java.lang.Integer">
+        select COUNT(*) from admin_user where id = #{userId} and is_deleted  = 0
+    </select>
+
+    <select id="selectUserById" resultType="com.kxhy.admin.domain.po.AdminUser">
+        select
+        id,
+        username,
+        nickname,
+        status,
+        is_deleted as isDeleted
+        from admin_user
+        where id = #{id}
+        and is_deleted = 0
+    </select>
+
+
+</mapper>

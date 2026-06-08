@@ -1,0 +1,120 @@
+server:
+  # 端口
+  port: 8003
+
+############## Sa-Token 配置 (文档: https://sa-token.cc) ##############
+sa-token:
+  # token 名称（同时也是 cookie 名称）
+  token-name: satoken
+  # token 有效期（单位：秒） 默认30天，-1 代表永久有效
+  timeout: 2592000
+  # token 最低活跃频率（单位：秒），如果 token 超过此时间没有访问系统就会被冻结，默认-1 代表不限制，永不冻结
+  active-timeout: -1
+  # 是否允许同一账号多地同时登录 （为 true 时允许一起登录, 为 false 时新登录挤掉旧登录）
+  is-concurrent: true
+  # 在多人登录同一账号时，是否共用一个 token （为 true 时所有登录共用一个 token, 为 false 时每次登录新建一个 token）
+  is-share: false
+  # token 风格（默认可取值：uuid、simple-uuid、random-32、random-64、random-128、tik）
+  token-style: uuid
+  # 是否输出操作日志
+  is-log: true
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/novel_user #?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+  # Redis
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      database: ${REDIS_DATABASE}
+      timeout: 5000  # 连接超时时间(毫秒)
+  cloud:
+    nacos:
+      server-addr: ${NACOS_SERVER_ADDR}
+  application:
+    name: novel-user
+# 邮件服务配置
+app:
+  email:
+    smtp:
+      host: ${EMAIL_SMTP_HOST}
+      port: ${EMAIL_SMTP_PORT}
+      ssl-enabled: ${EMAIL_SMTP_SSL_ENABLED}
+      from-email: ${APP_EMAIL_FROM}
+      auth-code: ${APP_EMAIL_AUTH_CODE}  # 替换为你的授权码
+      connection-timeout: 10000
+      timeout: 15000
+
+    pool:
+      max-total: 10
+      max-idle: 5
+      min-idle: 2
+      max-wait-millis: 3000
+      test-on-borrow: true
+      test-while-idle: true
+
+    retry:
+      max-attempts: 3
+      backoff-delay: 1000
+      multiplier: 2.0
+
+    template:
+      verification-code: "verification-email.ftl"
+
+    monitor:
+      enabled: true
+      metrics-prefix: "email"
+
+mybatis:
+  type-aliases-package: com.kxhy.novel.domain.po # 实体类别名包
+  configuration:
+    map-underscore-to-camel-case: true
+  #    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 可选：开启SQL日志
+  mapper-locations: classpath:mapper/*.xml # mapper.xml文件位置
+
+
+# 配置限流规则
+resilience4j:
+  ratelimiter:
+    instances:
+      user-register:
+        limit-for-period: 5           # 时间窗口内的请求限制数
+        limit-refresh-period: 10s     # 时间窗口大小
+        timeout-duration: 0           # 等待超时时间，0表示立即返回
+        register-health-indicator: true
+      user-login:
+        limit-for-period: 10
+        limit-refresh-period: 60s
+        timeout-duration: 0
+        register-health-indicator: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,ratelimiters
+  endpoint:
+    health:
+      show-details: always
+
+# 添加Swagger配置
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    enabled: true
+    try-it-out-enabled: true
+  packages-to-scan: com.kxh.novel.controller
+  paths-to-match: /**
+# 配置日志模式
+logging:
+  pattern:
+    level: "%5p [%X{requestId}]"
+  file:
+    name: logs/novel-app.log

@@ -1,0 +1,22 @@
+server:
+  port: 8001
+spring:
+  application:
+    name: minio-image
+  profiles:
+    active: local
+  config:
+    import:
+      - optional:nacos:novel-minio-local.yaml?group=DEFAULT_GROUP&refreshEnabled=true
+  cloud:
+    nacos:
+      discovery:
+        namespace:
+        group: DEFAULT_GROUP
+      config:
+        namespace:
+        group: DEFAULT_GROUP
+        file-extension: yaml
+
+
+

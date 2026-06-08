@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kxhy.mapper.CategoriesMapper">
+
+    <update id="updateCategoryStatus">
+        update categories
+        set
+            status = #{categories.status}
+        where id = #{id}
+        and is_delete = 0
+    </update>
+
+    <update id="categoryDeleteById">
+        update categories
+            set is_delete = 1
+        where id = #{id}
+        and is_delete = 0
+    </update>
+
+    <select id="countNormalCategory" resultType="java.lang.Integer">
+        select id, name, status, summary, creat_time createTime
+        from categories
+        where
+        id = #{id}
+        and is_delete = 0
+    </select>
+
+    <update id="updateCategory">
+        update categories
+        set
+            summary = #{categories.summary}
+        where id = #{id}
+        and is_delete = 0
+    </update>
+
+</mapper>

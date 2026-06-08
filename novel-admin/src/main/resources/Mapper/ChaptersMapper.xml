@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kxhy.mapper.ChaptersMapper">
+    
+    <insert id="insertChapter" useGeneratedKeys="true" keyProperty="id">
+
+    insert into chapters(article_id, chapter_index, title, word_count, display_order)
+    values (#{articleId}, #{chapterIndex}, #{chapterTitle}, #{wordCount}, #{displayOrder})
+
+    </insert>
+
+    <select id="selectChapterById" resultType="com.kxhy.domain.dto.ChapterBasicDTO">
+        select
+            c.id as chapterId,
+            c.title as chapterTitle
+        from chapters c
+                 inner join articles a on a.id = c.article_id
+        where c.id = #{chapterId}
+          and a.is_deleted = 0
+    </select>
+
+    <select id="selectChaptersByArticleId" resultType="com.kxhy.domain.dto.ChapterListDTO">
+        SELECT
+            c.id AS chapterId,
+            c.article_id AS articleId,
+            c.chapter_index AS chapterIndex,
+            c.title AS chapterTitle,
+            c.word_count AS wordCount,
+            c.status AS status,
+            c.source_url AS sourceUrl,
+            c.display_order AS displayOrder,
+            c.is_paragraphs_complete AS isParagraphsComplete,
+            c.create_time AS createTime,
+            c.update_time AS updateTime
+        FROM chapters c
+                 INNER JOIN articles a ON a.id = c.article_id
+        WHERE c.article_id = #{articleId}
+          AND a.is_deleted = 0
+        ORDER BY c.display_order ASC, c.chapter_index ASC
+    </select>
+
+    <select id="selectChapterContentsByChapterId" resultType="com.kxhy.domain.dto.ChapterContentRowDTO">
+        SELECT
+            c.id AS chapterId,
+            c.article_id AS articleId,
+            c.chapter_index AS chapterIndex,
+            p.id AS paragraphId,
+            p.paragraph_index AS paragraphIndex,
+            p.content AS content
+        FROM chapters c
+                 INNER JOIN articles a ON a.id = c.article_id
+                 INNER JOIN paragraphs p ON p.chapter_id = c.id
+        WHERE c.id = #{chapterId}
+          AND a.is_deleted = 0
+        ORDER BY p.paragraph_index ASC
+    </select>
+
+</mapper>

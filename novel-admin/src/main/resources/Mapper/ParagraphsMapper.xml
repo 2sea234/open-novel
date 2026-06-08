@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kxhy.mapper.ParagraphsMapper">
+
+    <insert id="insertParagraph" useGeneratedKeys="true" keyProperty="id">
+
+        insert into paragraphs(chapter_id, paragraph_index, content, paragraph_hash, create_time)
+        values (#{chapterId}, #{paragraphIndex}, #{content}, #{paragraphHash}, now())
+
+    </insert>
+
+    <insert id="insertBatchParagraphs" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into paragraphs(chapter_id, paragraph_index, content, paragraph_hash, create_time)
+        values
+            <foreach collection="list" item="item" separator=",">
+                (#{item.chapterId}, #{item.paragraphIndex}, #{item.content}, #{item.paragraphHash}, now())
+            </foreach>
+    </insert>
+
+</mapper>

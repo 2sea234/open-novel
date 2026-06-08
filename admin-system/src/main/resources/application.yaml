@@ -1,0 +1,20 @@
+server:
+  port: 8006
+
+spring:
+  application:
+    name: admin-system-service
+  profile:
+    active: local
+  config:
+    import:
+      - optional:nacos:admin-system-service-local.yaml?group=DEFAULT_GROUP&refreshEnabled=true
+  cloude:
+    nacos:
+      discovery:
+        namespace:
+        group: DEFAULT_GROUP
+      config:
+        namespace:
+        group: DEFAULT_GROUP
+        file-extension: yaml

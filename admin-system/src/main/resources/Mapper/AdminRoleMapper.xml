@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kxhy.admin.mapper.AdminRoleMapper">
+
+    <select id="countAvailableRolesByIds" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM admin_role
+        WHERE is_deleted = 0
+        AND status = 1
+        AND id IN
+        <foreach collection="roleIds" item="roleId" open="(" separator="," close=")">
+            #{roleId}
+        </foreach>
+    </select>
+
+    <select id="selectRolePage" resultType="com.kxhy.admin.domain.vo.AdminRoleListVO">
+        SELECT
+        id,
+        role_code AS roleCode,
+        role_name AS roleName,
+        status,
+        sort,
+        remark,
+        create_time AS createTime,
+        update_time AS updateTime
+        FROM admin_role
+        WHERE is_deleted = 0
+
+        <if test="query.roleCode != null and query.roleCode != ''">
+            AND role_code LIKE CONCAT('%', #{query.roleCode}, '%')
+        </if>
+
+        <if test="query.roleName != null and query.roleName != ''">
+            AND role_name LIKE CONCAT('%', #{query.roleName}, '%')
+        </if>
+
+        <if test="query.status != null">
+            AND status = #{query.status}
+        </if>
+
+        ORDER BY sort ASC, id DESC
+    </select>
+
+    <select id="countByRoleCode" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM admin_role
+        WHERE role_code = #{roleCode}
+        AND is_deleted = 0
+    </select>
+
+    <insert id="insertRole"
+            parameterType="com.kxhy.admin.domain.po.AdminRole"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO admin_role (
+        role_code,
+        role_name,
+        status,
+        sort,
+        remark,
+        create_by,
+        update_by
+        ) VALUES (
+        #{roleCode},
+        #{roleName},
+        #{status},
+        #{sort},
+        #{remark},
+        #{createBy},
+        #{updateBy}
+        )
+    </insert>
+
+    <select id="selectRoleById" resultType="com.kxhy.admin.domain.po.AdminRole">
+        SELECT
+        id,
+        role_code AS roleCode,
+        role_name AS roleName,
+        status,
+        sort,
+        remark,
+        create_time AS createTime,
+        update_time AS updateTime,
+        create_by AS createBy,
+        update_by AS updateBy,
+        is_deleted AS isDeleted
+        FROM admin_role
+        WHERE id = #{id}
+        AND is_deleted = 0
+    </select>
+
+    <update id="updateRoleById">
+        UPDATE admin_role
+        SET
+        role_name = #{dto.roleName},
+        status = #{dto.status},
+        sort = #{dto.sort},
+        remark = #{dto.remark},
+        update_by = #{adminId},
+        update_time = NOW()
+        WHERE id = #{id}
+        AND is_deleted = 0
+    </update>
+
+    <update id="updateRoleStatusById">
+        UPDATE admin_role
+        SET
+        status = #{status},
+        update_by = #{adminId},
+        update_time = NOW()
+        WHERE id = #{id}
+        and is_deleted = 0
+    </update>
+
+    <select id="countUserRoleByRoleId" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM admin_user_role
+        WHERE role_id = #{roleId}
+    </select>
+
+    <update id="logicalDeleteRole">
+        UPDATE admin_role
+        SET
+        is_deleted = 1,
+        update_by = #{adminId},
+        update_time = NOW()
+        WHERE id = #{id}
+        AND is_deleted = 0
+    </update>
+
+    <select id="countNormalRoleById" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM admin_role
+        WHERE id = #{roleId}
+        AND status = 1
+        AND is_deleted = 0
+    </select>
+
+
+</mapper>

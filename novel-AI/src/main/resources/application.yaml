@@ -1,0 +1,19 @@
+server:
+  port: 8002
+spring:
+  application:
+    name: novel-ai
+  profiles:
+    active: local
+  config:
+    import:
+      - optional:nacos:novel-ai-local.yaml?group=DEFAULT_GROUP&refresh=true
+  cloud:
+    nacos:
+      discovery:
+        namespace:
+        group: DEFAULT_GROUP
+      config:
+        namespce:
+        group: DEFAULT_GROUP
+        file-extension: yaml

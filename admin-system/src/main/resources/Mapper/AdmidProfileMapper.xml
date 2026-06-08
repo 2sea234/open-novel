@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kxhy.admin.mapper.AdminProfileMapper">
+
+    <select id="selectProfileById" resultType="com.kxhy.admin.domain.vo.AdminProfileVO">
+        select
+        id,
+        username,
+        nickname,
+        status,
+        create_time as createTime,
+        update_time as updateTime
+        from admin_user
+        where id = #{adminId}
+        and is_deleted = 0
+    </select>
+
+    <select id="selectPasswordById" resultType="java.lang.String">
+        select password from admin_user where id = #{adminId} and is_deleted = 0
+    </select>
+
+    <update id="updateProfile">
+        update admin_user
+        set
+        nickname = #{dto.nickname},
+        update_by = #{adminId},
+        update_time = now()
+        where id = #{adminId}
+        and is_deleted = 0
+    </update>
+
+    <update id="updateProfilePassword">
+        update admin_user
+        set
+        password = #{encodedPassword},
+        update_by = #{adminId},
+        update_time = now()
+        where id = #{adminId}
+        and is_deleted = 0
+    </update>
+</mapper>

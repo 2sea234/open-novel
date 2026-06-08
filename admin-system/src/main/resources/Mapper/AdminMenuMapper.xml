@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kxhy.admin.mapper.AdminMenuMapper">
+
+    <select id="selectMenusByAdminId" resultType="com.kxhy.admin.domain.vo.AdminMenuVO">
+        SELECT DISTINCT
+        m.id,
+        m.parent_id AS parentId,
+        m.menu_name AS menuName,
+        m.menu_type AS menuType,
+        m.path,
+        m.component,
+        m.icon,
+        m.sort,
+        m.visible
+        FROM admin_user_role ur
+        INNER JOIN admin_role r
+        ON ur.role_id = r.id
+        AND r.status = 1
+        AND r.is_deleted = 0
+        INNER JOIN admin_role_menu rm
+        ON r.id = rm.role_id
+        INNER JOIN admin_menu m
+        ON rm.menu_id = m.id
+        AND m.status = 1
+        AND m.is_deleted = 0
+        WHERE ur.user_id = #{adminId}
+        AND m.visible = 1
+        ORDER BY m.sort ASC, m.id ASC
+    </select>
+
+    <select id="selectAllMenuList" resultType="com.kxhy.admin.domain.vo.AdminMenuTreeVO">
+        select
+        id,
+        parent_id as parentId,
+        menu_name as menuName,
+        menu_type as menuType,
+        path,
+        component,
+        icon,
+        sort,
+        visible,
+        status,
+        remark,
+        create_time as createTime,
+        update_time as updateTime
+        from admin_menu
+        where is_deleted = 0
+        order by parent_id asc, sort asc, id asc
+    </select>
+
+    <select id="countNormalMenuById" resultType="java.lang.Integer">
+        select count(*)
+        from admin_menu
+        where id = #{id}
+        and is_deleted = 0
+    </select>
+
+    <insert id="insertMenu">
+        insert into admin_menu
+        (
+        parent_id,
+        menu_name,
+        menu_type,
+        path,
+        component,
+        icon,
+        sort,
+        visible,
+        status,
+        remark,
+        create_by,
+        update_by,
+        create_time,
+        update_time,
+        is_deleted
+        )
+        values
+        (
+        #{dto.parentId},
+        #{dto.menuName},
+        #{dto.menuType},
+        #{dto.path},
+        #{dto.component},
+        #{dto.icon},
+        #{dto.sort},
+        #{dto.visible},
+        #{dto.status},
+        #{dto.remark},
+        #{adminId},
+        #{adminId},
+        now(),
+        now(),
+        0
+        )
+    </insert>
+
+    <update id="updateMenuById">
+        update admin_menu
+        set
+        parent_id = #{dto.parentId},
+        menu_name = #{dto.menuName},
+        menu_type = #{dto.menuType},
+        path = #{dto.path},
+        component = #{dto.component},
+        icon = #{dto.icon},
+        sort = #{dto.sort},
+        visible = #{dto.visible},
+        status = #{dto.status},
+        remark = #{dto.remark},
+        update_by = #{adminId},
+        update_time = now()
+        where id = #{id}
+        and is_deleted = 0
+    </update>
+
+    <update id="updateMenuStatus">
+        update admin_menu
+        set
+        status = #{dto.status},
+        update_by = #{adminId},
+        update_time = now()
+        where id = #{id}
+        and is_deleted = 0
+    </update>
+
+    <select id="countChildrenByParentId" resultType="java.lang.Integer">
+        select count(*)
+        from admin_menu
+        where parent_id = #{parentId}
+        and is_deleted = 0
+    </select>
+
+    <delete id="deleteMenuById">
+        update admin_menu
+        set
+        is_deleted = 1,
+        update_by = #{adminId},
+        update_time = now()
+        where id = #{id}
+        and is_deleted = 0
+    </delete>
+
+    <select id="countNormalMenusByIds" resultType="java.lang.Integer">
+        select count(*)
+        from admin_menu
+        where id in
+        <foreach collection="menuIds" item="menuId" open="(" separator="," close=")">
+            #{menuId}
+        </foreach>
+        and is_deleted = 0
+    </select>
+
+
+
+</mapper>

@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kxhy.mapper.ArticlesMapper">
+    <update id="updateArticles">
+        update articles
+        <set>
+            <if test="articles.title != null and articles.title != ''">
+                title = #{articles.title},
+            </if>
+            <if test="articles.authorName != null and articles.authorName != ''">
+                author_name = #{articles.authorName},
+            </if>
+            <if test="articles.categoryId != null">
+                category_id = #{articles.categoryId},
+            </if>
+            <if test="articles.status != null">
+                status = #{articles.status},
+            </if>
+            <if test="articles.coverImage != null">
+                cover_image = #{articles.coverImage},
+            </if>
+            <if test="articles.summary != null and articles.summary != ''">
+                summary = #{articles.summary},
+            </if>
+            <if test="articles.isFinished != null">
+                is_finished = #{articles.isFinished},
+            </if>
+            <if test="articles.updateBy != null">
+                update_by = #{articles.updateBy},
+            </if>
+            <if test="articles.coverObjectName != null">
+                cover_object_name = #{articles.coverObjectName},
+            </if>
+            update_time = now()
+        </set>
+        where id = #{id}
+        and is_deleted = 0
+    </update>
+
+    <select id="queryArticles" resultType="com.kxhy.domain.dto.ArticlesDTO">
+        SELECT
+            a.id,
+            a.cover_image as coverImage,
+            a.title,
+            a.author_name as authorName,
+            c.name as categoryName,
+            a.word_count as wordCount,
+            a.chapter_count as chapterCount,
+            a.summary,
+            a.status,
+            a.is_finished as isFinished,
+            case a.is_finished
+            when 0 then '封禁'
+            when 1 then '完结'
+            when 2 then '连载'
+            when 3 then '停更'
+            else '未知'
+            end as isFinishedDesc,
+            a.update_time as updateTime
+        FROM articles a
+        INNER JOIN categories c ON c.id = a.category_id
+        <where>
+            a.is_deleted = 0
+            <if test="title != null and title != ''">
+                AND a.title LIKE CONCAT('%', #{title}, '%')
+            </if>
+            <if test="authorName != null and authorName != ''">
+                AND a.author_name = #{authorName}
+            </if>
+            <if test="categoryId != null">
+                AND a.category_id = #{categoryId}
+            </if>
+            <if test="isFinished != null">
+                AND a.is_finished = #{isFinished}
+            </if>
+            <if test="status != null">
+                AND a.status = #{status}
+            </if>
+        </where>
+        order by a.update_time desc
+    </select>
+
+    <insert id="insertArticle" useGeneratedKeys="true" keyProperty="id">
+        insert into articles (title,
+                              author_name,
+                              category_id,
+                              cover_image,
+                              summary,
+                              word_count,
+                              chapter_count,
+                              is_finished,
+                              status,
+                              create_time,
+                              update_time,
+                              create_by,
+                              update_by,
+                              cover_object_name)
+        values (#{title},
+                #{authorName},
+                #{categoryId},
+                #{coverImage},
+                #{summary},
+                #{wordCount},
+                #{chapterCount},
+                #{isFinished},
+                #{status},
+                now(),
+                now(),
+                #{createBy},
+                #{updateBy},
+                #{coverObjectName})
+
+    </insert>
+
+
+    <update id="updateArticleStats">
+        update articles
+        set word_count = #{wordCount},
+            chapter_count = #{chapterCount},
+            update_time = now()
+        where id = #{id}
+          and is_deleted = 0
+    </update>
+
+
+    <update id="logicalDeleteArticleById">
+        update articles set is_deleted = 1, deleted_at = now(), deleted_by = #{adminId} where id = #{articleId} and is_deleted = 0
+    </update>
+    
+    <update id="batchLogicalDeleteArticles">
+
+        update articles set is_deleted = 1, deleted_at = now(), deleted_by = #{adminId} where id in
+        <foreach collection="articleIds" item="articleId" separator="," close=")" open="(">
+            #{articleId}
+        </foreach>
+        and is_deleted = 0
+    </update>
+
+    <select id="countNotDeletedArticlesByIds" resultType="java.lang.Integer">
+        select
+            count(*)
+        from articles where id in
+        <foreach collection="articleIds" item="articleId" separator="," close=")" open="(">
+            #{articleId}
+        </foreach>
+        and is_deleted = 0
+    </select>
+
+    <select id="queryArticleById" resultType="com.kxhy.domain.dto.ArticlesDTO">
+        select a.id,
+               a.title,
+               a.author_name as authorName,
+               c.name as categoryName,
+               a.cover_image as coverImage,
+               a.summary,
+               a.word_count as wordCount,
+               a.chapter_count as chapterCount,
+               a.status,
+               a.update_time as updateTime,
+               a.is_finished as isFinished,
+               case a.is_finished
+                   when 0 then '封禁'
+                   when 1 then '完结'
+                   when 2 then '连载'
+                   when 3 then '停更'
+                   else '未知'
+                   end as isFinishedDesc,
+             a.cover_object_name
+        from articles a
+                 inner join categories c on c.id = a.category_id
+        where a.id = #{articleId}
+          and a.is_deleted = 0
+    </select>
+
+    <!-- 根据articleId查询chapter -->
+    <select id="selectChaptersByArticleId" resultType="java.util.Map" parameterType="java.lang.Integer">
+        select
+            c.id,
+            c.article_id,
+            c.chapter_index,
+            c.title,
+            c.start_paragraph,
+            c.end_paragraph,
+            c.word_count,
+            c.status,
+            c.source_url,
+            c.create_time,
+            c.update_time,
+            c.display_order,
+            c.is_paragraphs_complete
+        from chapters c
+                 inner join articles a on a.id = c.article_id
+        where c.article_id = #{articleId}
+          and a.is_deleted = 0
+        order by c.display_order asc, c.chapter_index asc
+    </select>
+
+
+     <!-- 根据chapterId查询chapter内容 -->
+    <select id="selectChapterContentsByChapterIds" resultType="java.util.Map">
+        select
+        c.id as chapter_id,
+        c.article_id,
+        c.chapter_index,
+        c.title as chapter_title,
+        p.id as paragraph_id,
+        p.paragraph_index,
+        p.content
+        from chapters c
+        inner join articles a
+        on a.id = c.article_id
+        inner join paragraphs p
+        on p.article_id = c.article_id
+        and p.paragraph_index between c.start_paragraph and c.end_paragraph
+        where c.id in
+        <foreach collection="chapterIds" item="chapterId" open="(" separator="," close=")">
+            #{chapterId}
+        </foreach>
+        and a.is_deleted = 0
+        order by c.display_order asc, c.chapter_index asc, p.paragraph_index asc
+    </select>
+
+
+
+    <!-- 按 id 查询文章（包含已删除） -->
+    <select id="selectArticleByIdIncludeDeleted"
+            resultType="com.kxhy.domain.po.Articles"
+            parameterType="java.lang.Integer">
+        select
+            id,
+            title,
+            status,
+            is_deleted as isDeleted,
+            deleted_at as deletedAt,
+            deleted_by as deletedBy,
+            update_time as updateTime,
+            update_by as updateBy
+        from articles
+        where id = #{id}
+    </select>
+
+    <!-- 批量查询文章删除状态 -->
+    <select id="selectArticleDeleteStatusByIds"
+            resultType="com.kxhy.domain.po.Articles">
+        select
+        id,
+        is_deleted as isDeleted
+        from articles
+        where id in
+        <foreach collection="articleIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+
+
+    <!-- 统计已删除文章数量（可保留） -->
+    <select id="countDeletedArticlesByIds"
+            resultType="java.lang.Integer">
+        select count(1)
+        from articles
+        where id in
+        <foreach collection="articleIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        and is_deleted = 1
+    </select>
+
+    <!-- 单本恢复 -->
+    <update id="recoverArticleById">
+        update articles
+        set
+            status = 2,
+            is_deleted = 0,
+            deleted_at = null,
+            deleted_by = null,
+            update_time = now(),
+            update_by = #{adminId}
+        where id = #{id}
+          and is_deleted = 1
+    </update>
+
+    <!-- 批量恢复 -->
+    <update id="batchRecoverArticles">
+        update articles
+        set
+        status = 2,
+        is_deleted = 0,
+        deleted_at = null,
+        deleted_by = null,
+        update_time = now(),
+        update_by = #{adminId}
+        where id in
+        <foreach collection="articleIds" item="articleIds" open="(" separator="," close=")">
+            #{articleIds}
+        </foreach>
+        and is_deleted = 1
+    </update>
+
+    <select id="queryRecycleArticles" resultType="com.kxhy.domain.dto.ArticleRecycleListDTO">
+        select
+            a.id,
+            a.title,
+            a.author_name as authorName,
+            c.name as categoryName,
+            a.chapter_count as chapterCount,
+            a.deleted_at as deletedAt
+        from articles a
+                 left join categories c on c.id = a.category_id
+        where a.is_deleted = 1
+        order by a.deleted_at desc
+    </select>
+
+
+</mapper>

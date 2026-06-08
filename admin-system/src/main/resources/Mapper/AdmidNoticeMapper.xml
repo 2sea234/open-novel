@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kxhy.admin.mapper.AdminNoticeMapper">
+
+    <select id="selectNoticePage" resultType="com.kxhy.admin.domain.vo.AdminNoticeVO">
+        SELECT
+            id,
+            title,
+            content,
+            notice_type as noticeType,
+            status,
+            sort,
+            create_by as createBy,
+            update_by as updateBy,
+            create_time as createTime,
+            update_time as updateTime
+        from admin_notice
+        <where>
+            is_deleted = 0
+
+            <if test="query.title != null and query.title != ''">
+                and title like concat('%', #{query.title}, '%')
+            </if>
+
+            <if test="query.noticeType != null">
+                and notice_type = #{query.noticeType}
+            </if>
+
+            <if test="query.status != null">
+                and status = #{query.status}
+            </if>
+
+            <if test="query.startTime != null">
+                and create_time &gt;= #{query.startTime}
+            </if>
+
+            <if test="query.endTime != null">
+                and create_time &lt;= #{query.endTime}
+            </if>
+        </where>
+        order by sort asc, create_time desc, id desc
+    </select>
+
+    <insert id="insertNotice">
+        insert into admin_notice(
+            title,
+            content,
+            notice_type,
+            status,
+            sort,
+            create_by,
+            update_by,
+            create_time,
+            update_time,
+            is_deleted
+        ) values
+        (#{dto.title}, #{dto.content}, #{dto.noticeType}, #{dto.status}, #{dto.sort}, #{adminId}, #{adminId}, now(), now(), 0)
+    </insert>
+
+    <select id="countNormalNoticeById" resultType="java.lang.Integer">
+        select count(*)
+        from admin_notice
+        where id = #{id}
+        and is_deleted = 0
+    </select>
+
+    <update id="updateNoticeById">
+        update admin_notice
+        <set>
+            <if test="dto.title != null">
+                title = #{dto.title},
+            </if>
+            <if test="dto.content != null">
+                content = #{dto.content},
+            </if>
+            <if test="dto.noticeType != null">
+                notice_type = #{dto.noticeType},
+            </if>
+            <if test="dto.status != null">
+                status = #{dto.status},
+            </if>
+        </set>
+        where id = #{id}
+        and is_deleted = 0
+    </update>
+
+    <update id="updateNoticeStatus">
+        update admin_notice
+        <set>
+            status = #{status},
+            update_by = #{adminId},
+            update_time = now()
+        </set>
+        where id = #{id}
+        and is_deleted = 0
+    </update>
+
+    <update id="deleteNoticeById">
+        update admin_notice
+        set
+        is_deleted = 1,
+        update_by = #{adminId},
+        update_time = now()
+        where id = #{id}
+        and is_deleted = 0
+    </update>
+
+
+</mapper>

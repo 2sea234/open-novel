@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kxhy.admin.mapper.AdminLoginLogMapper">
+
+    <insert id="insertLoginLog">
+        insert into admin_login_log
+        (
+        username,
+        login_status,
+        login_ip,
+        user_agent,
+        error_message,
+        login_time
+        )
+        values
+        (
+        #{username},
+        #{loginStatus},
+        #{loginIp},
+        #{userAgent},
+        #{errorMessage},
+        now()
+        )
+    </insert>
+
+    <select id="queryLoginLogById" resultType="com.kxhy.admin.domain.vo.AdminLoginLogVO">
+        SELECT id, username, login_status, login_ip, user_agent, error_message, login_time
+        FROM admin_login_log
+        <where>
+            <if test="query.username != null and query.username != ''">
+                and username LIKE CONCAT('%', #{query.username}, '%')
+            </if>
+            <if test="query.loginStatus != null">
+                and login_status = #{query.loginStatus}
+            </if>
+            <if test="query.startTime != null">
+                and login_time &gt;= #{query.startTime}
+            </if>
+            <if test="query.endTime != null">
+                and login_time &lt;= #{query.endTime}
+            </if>
+        </where>
+        order by login_time desc, id desc
+    </select>
+
+</mapper>
