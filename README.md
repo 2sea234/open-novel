@@ -1,45 +1,23 @@
 # OpenNovel
 
-OpenNovel 是一个基于 Java / Spring Boot 的小说平台后端项目，采用多模块结构进行拆分，主要包含后台权限系统、小说后台管理、图片上传服务、AI 辅助服务、前台用户服务等模块。
+OpenNovel 是一个基于 Java / Spring Boot 的小说平台后端项目。仓库现在主要放后端多模块代码，包含后台权限、小说后台管理、图片上传、AI 辅助、前台用户等服务。
 
-当前仓库主要用于保存 OpenNovel 后端代码与项目结构，部分本地配置、数据库脚本、未完成模块暂未提交。
-
----
-
-## 项目简介
-
-OpenNovel 是一个小说平台后端项目，当前主要围绕后台管理、权限控制、小说内容导入、图片存储和用户基础能力进行开发。项目采用多模块结构拆分，当前仓库包含 gateway、common、admin-system、novel-admin、minio-image、novel-AI、novel-user 等模块。
-
-当前已实现或基本完成的能力包括：
-
-后台管理员登录与 JWT 鉴权
-Gateway 统一入口、后台接口保护与登录人信息透传
-RBAC 权限模型，包含用户、角色、菜单、权限码及关系表
-基于 @RequirePermission + Spring AOP 的后台接口级权限控制
-管理员、角色、菜单、权限分配等后台管理功能
-登录日志、操作日志、通知公告、个人中心等后台基础能力
-小说分类、小说信息、章节、段落等后台管理功能
-TXT 小说导入、章节识别、段落拆分与锚点数据生成
-小说封面上传、删除与 MinIO 对象存储封装
-前台用户注册、登录、邮箱验证码等基础能力
-novel-AI 模块提供小说信息生成等 AI 辅助能力的基础调用与后续扩展预留
-
----
+这个项目还在开发中。公开仓库不会提交真实本地配置、数据库密码、对象存储密钥和邮箱授权码，下面的配置示例都用占位符，方便本地拉起来之后按自己的环境改。
 
 ## 技术栈
 
-| 分类      | 技术                                     |
-| ------- | -------------------------------------- |
-| 后端框架    | Java、Spring Boot、Spring MVC、Spring AOP |
-| 网关      | Spring Cloud Gateway                   |
-| 持久层     | MyBatis、MyBatis XML、PageHelper         |
-| 数据库     | MySQL                                  |
-| 配置 / 注册 | Nacos                                  |
-| 对象存储    | MinIO                                  |
-| 认证授权    | JWT、BCrypt、RBAC                        |
-| 其他      | Maven、Docker、Postman、Git               |
-
----
+| 分类            | 技术                                         |
+| --------------- | -------------------------------------------- |
+| 后端            | Java 17、Spring Boot、Spring MVC、Spring AOP |
+| 网关            | Spring Cloud Gateway                         |
+| 服务注册 / 配置 | Nacos                                        |
+| 持久层          | MyBatis、MyBatis XML、PageHelper             |
+| 数据库          | MySQL                                        |
+| 缓存            | Redis                                        |
+| 对象存储        | MinIO                                        |
+| 认证授权        | JWT、BCrypt、RBAC、Sa-Token                  |
+| AI              | Ollama、Spring AI                            |
+| 构建            | Maven                                        |
 
 ## 模块结构
 
@@ -54,281 +32,61 @@ OpenNovel
 └── novel-user
 ```
 
-### common
+| 模块           | 默认端口 | 说明                                               | 配置文件                                           |
+| -------------- | -------- | -------------------------------------------------- | -------------------------------------------------- |
+| `common`       | 无       | 公共返回体、异常、JWT、权限注解和通用 DTO / VO     | 无独立启动配置                                     |
+| `gateway`      | `8010`   | 统一入口、路由转发、后台 JWT 校验和登录人信息透传  | `gateway/src/main/resources/application.yaml`      |
+| `admin-system` | `8006`   | 后台管理员、角色、菜单、权限、日志、公告、个人中心 | `admin-system/src/main/resources/application.yaml` |
+| `novel-admin`  | `8000`   | 小说分类、小说信息、章节、段落、TXT 导入、封面管理 | `novel-admin/src/main/resources/application.yaml`  |
+| `minio-image`  | `8001`   | 图片上传、删除、MinIO 对象存储封装                 | `minio-image/src/main/resources/application.yaml`  |
+| `novel-AI`     | `8002`   | 小说信息生成等 AI 辅助能力                         | `novel-AI/src/main/resources/application.yaml`     |
+| `novel-user`   | `8003`   | 前台用户注册、登录、邮箱验证码、用户基础信息       | `novel-user/src/main/resources/application.yml`    |
 
-公共模块，主要放置跨服务复用的基础能力，例如：
+更多模块说明可以看 `docs/architecture.md`。
 
-* 统一返回结果
-* 业务异常
-* 全局异常处理
-* JWT 工具类
-* JWT 配置类
-* 权限注解
-* 通用 DTO / VO
+## 当前进度
 
-### gateway
+已经基本完成的部分：
 
-网关模块，作为后台请求统一入口，主要负责：
+* 后台管理员登录和 JWT 鉴权
+* Gateway 统一入口、后台接口保护和请求头透传
+* RBAC 权限模型，包含用户、角色、菜单、权限码和关系表
+* `@RequirePermission` + Spring AOP 的接口级权限控制
+* 管理员、角色、菜单、权限分配、登录日志、操作日志、通知公告、个人中心
+* 小说分类、小说信息、章节、段落、回收站、TXT 导入
+* 小说封面上传、删除和 MinIO 存储
+* 前台用户注册、登录、邮箱验证码
+* 基于 Ollama 的小说元信息生成接口
 
-* 请求路由
-* 登录白名单放行
-* JWT 校验
-* 后台接口保护
-* 解析登录用户信息
-* 向下游服务透传当前管理员信息
+还在补的部分：
 
-### admin-system
-
-后台系统模块，主要负责后台基础能力：
-
-* 管理员登录
-* 用户管理
-* 角色管理
-* 菜单管理
-* 权限码管理
-* 用户分配角色
-* 角色分配菜单
-* 角色分配权限
-* 当前管理员菜单树
-* 当前管理员权限码
-* 登录日志
-* 操作日志
-* 通知公告
-* 个人中心
-
-### novel-admin
-
-小说后台管理模块，主要负责小说内容相关管理：
-
-* 分类管理
-* 小说列表
-* 小说详情
-* 小说新增 / 修改
-* 小说逻辑删除
-* 批量删除
-* 回收站
-* 小说恢复
-* TXT 导入
-* 章节解析
-* 段落解析
-* 章节正文查询
-* 封面管理
-
-### minio-image
-
-图片服务模块，主要负责：
-
-* 图片上传
-* 图片删除
-* MinIO 对象存储封装
-* 图片访问地址返回
-* objectName 返回
-* 图片文件类型校验
-
-### novel-AI
-
-AI 辅助服务模块，主要用于：
-
-* 小说信息生成
-* 小说分类 / 简介等 AI 能力预留
-* 对接本地或外部 AI 服务
-
-### novel-user
-
-前台用户服务模块，主要负责：
-
-* 用户注册
-* 用户登录
-* 邮箱验证码
-* 用户基础信息
-* 用户角色
-* 用户权限切面
-* 用户操作日志
-* Redis / Sa-Token 等相关配置
-
----
-
-## 当前功能进度
-
-### 已完成或基本完成
-
-* 后台管理员登录
-* Gateway + JWT 后台鉴权
-* RBAC 权限模型
-* 后端接口级权限校验
-* 用户管理
-* 角色管理
-* 菜单管理
-* 权限分配
-* 登录日志
-* 操作日志
-* 通知公告
-* 个人中心
-* 小说分类管理
-* 小说管理
-* TXT 小说导入
-* 章节 / 段落解析
-* 回收站与恢复
-* MinIO 图片上传与删除
-* 前台用户注册 / 登录基础能力
-
-### 开发中 / 后续计划
-
-* 完善数据库初始化脚本
-* 完善接口文档
-* 完善 Postman 测试集合
-* 完善前台小说展示模块
-* 完善小说元数据模块
-* 增加 Redis 权限缓存
-* 增加 token 黑名单或 tokenVersion 机制
-* 增加服务间鉴权
-* 增加单元测试和集成测试
-* 完善 Docker Compose 一键启动环境
-
----
+* 数据库初始化 SQL
+* 接口文档和 Postman Collection
+* Docker Compose 一键启动环境
+* 前台小说展示和小说元数据相关模块
+* 权限缓存、token 失效机制、服务间鉴权
+* 单元测试和集成测试
 
 ## 核心设计
 
-### 1. Gateway + JWT 鉴权
-
-后台接口统一经过 gateway 访问。
-
-基本流程：
+后台请求统一从 `gateway` 进入。当前网关里登录白名单是 `/api/adminSystem/adminLogin`，后台受保护路径主要是 `/api/adminSystem/**`。
 
 ```text
 客户端请求
-    ↓
-Gateway 判断是否白名单
-    ↓
-校验 JWT
-    ↓
-解析 adminId / username / loginType
-    ↓
-注入 X-Admin-Id / X-Admin-Username
-    ↓
-转发到下游服务
+  -> Gateway 判断是否白名单
+  -> 校验 JWT
+  -> 解析 adminId / username / loginType
+  -> 写入 X-Admin-Id / X-Admin-Username
+  -> 转发到下游服务
 ```
 
-下游服务通过 gateway 透传的请求头获取当前管理员信息，用于业务处理、权限校验和操作日志记录。
-
----
-
-### 2. RBAC 权限模型
-
-后台权限采用 RBAC 模型，核心关系如下：
-
-```text
-管理员用户
-    ↓
-用户角色关系
-    ↓
-角色
-    ↓
-角色菜单关系 / 角色权限关系
-    ↓
-菜单 / 权限码
-```
-
-菜单主要控制页面可见性，权限码主要控制具体操作权限。
-
-示例权限码：
-
-```text
-admin:user:list
-admin:user:add
-admin:user:update
-admin:user:delete
-admin:role:list
-admin:role:assign-menu
-admin:role:assign-permission
-```
-
----
-
-### 3. 接口级权限控制
-
-项目通过自定义权限注解和 Spring AOP 实现接口级权限校验。
-
-示例：
+后台权限使用 RBAC。菜单控制页面可见性，权限码控制具体操作，接口上通过类似下面的注解做权限校验：
 
 ```java
 @RequirePermission("admin:user:delete")
 ```
 
-请求进入接口前，权限切面会读取当前管理员 ID，查询其拥有的权限码，并判断是否拥有当前接口所需权限。没有权限时返回 403。
-
----
-
-### 4. 操作日志
-
-后台关键操作会记录操作日志，包括：
-
-* 操作人
-* 操作模块
-* 操作类型
-* 操作描述
-* 请求路径
-* 请求方式
-* IP
-* User-Agent
-* 操作状态
-* 失败原因
-* 操作时间
-
-操作日志用于记录后台关键行为，方便后续排查和审计。
-
----
-
-### 5. TXT 导入解析
-
-TXT 小说导入流程大致如下：
-
-```text
-上传 TXT 文件
-    ↓
-读取文件内容
-    ↓
-解析文件名 / 正文头部
-    ↓
-识别小说标题和作者
-    ↓
-识别章节
-    ↓
-拆分段落
-    ↓
-保存文章
-    ↓
-保存章节
-    ↓
-保存段落
-    ↓
-生成锚点数据
-    ↓
-更新字数和章节数
-```
-
-通过该流程将非结构化 TXT 小说文本转换为结构化的文章、章节、段落数据。
-
----
-
-### 6. MinIO 图片上传
-
-图片上传服务基于 MinIO 实现。
-
-上传成功后返回：
-
-* 图片访问 URL
-* objectName
-
-其中 URL 用于前端展示，objectName 用于后续删除对象。
-
-图片上传时会进行基础校验，包括：
-
-* 文件后缀
-* Content-Type
-* 文件头 magic number
-
----
+TXT 导入会把非结构化文本拆成小说、章节、段落和锚点数据。图片上传成功后返回访问 URL 和 `objectName`，其中 `objectName` 用于后续删除 MinIO 对象。
 
 ## 本地运行
 
@@ -337,55 +95,20 @@ TXT 小说导入流程大致如下：
 * JDK 17+
 * Maven 3.8+
 * MySQL 8.x
+* Redis
 * Nacos
 * MinIO
-* Docker（可选）
+* Ollama，只有运行 `novel-AI` 时需要
 
-### 克隆项目
+### 克隆和编译
 
 ```bash
 git clone https://github.com/2sea234/open-novel.git
 cd open-novel
-```
-
-### 配置说明
-
-本仓库不提交真实本地配置和密钥，运行前需要准备以下配置：
-
-* MySQL 地址、账号、密码
-* Nacos 地址
-* MinIO endpoint、accessKey、secretKey、bucket
-* JWT secret
-* 邮箱授权码
-* AI 服务地址
-
-建议通过环境变量、Nacos 配置中心或本地外置配置文件进行配置。
-
-示例：
-
-```yaml
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/opennovel
-    username: ${MYSQL_USERNAME}
-    password: ${MYSQL_PASSWORD}
-
-jwt:
-  secret: ${JWT_SECRET}
-
-minio:
-  endpoint: ${MINIO_ENDPOINT}
-  access-key: ${MINIO_ACCESS_KEY}
-  secret-key: ${MINIO_SECRET_KEY}
-```
-
-### 编译
-
-```bash
 mvn clean install
 ```
 
-如果只编译指定模块：
+只编译某个模块时可以这样写：
 
 ```bash
 mvn clean package -pl admin-system -am
@@ -397,70 +120,466 @@ mvn clean package -pl admin-system -am
 
 ```text
 MySQL
+Redis
 Nacos
 MinIO
+Ollama
 ```
 
 再启动后端模块：
 
 ```text
-gateway
 admin-system
 novel-admin
 minio-image
 novel-AI
 novel-user
+gateway
 ```
 
-具体端口和配置以各模块配置文件为准。
+单个模块本地启动示例：
 
----
+```bash
+mvn spring-boot:run -pl admin-system -am
+mvn spring-boot:run -pl gateway -am
+```
 
-## 目录未提交说明
+## 配置文件示例
 
-当前仓库暂未提交以下模块：
+下面这些示例是给本地开发用的。真实密码、密钥、邮箱授权码不要写死在仓库里，建议用环境变量、Nacos 配置中心或本地未提交的 `*-local.yaml` 管理。
+
+### 1. gateway
+
+文件：`gateway/src/main/resources/application.yaml`
+
+```yaml
+server:
+  port: 8010
+
+spring:
+  application:
+    name: gateway
+  profiles:
+    active: local
+  config:
+    import:
+      - optional:nacos:novel-gateway-local.yaml?group=DEFAULT_GROUP&refresh-enabled=true
+  cloud:
+    nacos:
+      server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+      discovery:
+        namespace: ${NACOS_NAMESPACE:}
+        group: DEFAULT_GROUP
+      config:
+        namespace: ${NACOS_NAMESPACE:}
+        group: DEFAULT_GROUP
+        file-extension: yaml
+```
+
+Nacos Data ID：`novel-gateway-local.yaml`
+
+```yaml
+jwt:
+  secret: ${JWT_SECRET}
+  expire-time: ${JWT_EXPIRE_TIME:86400000}
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: admin-system
+          uri: lb://admin-system-service
+          predicates:
+            - Path=/api/adminSystem/**
+          filters:
+            - StripPrefix=1
+        - id: novel-admin
+          uri: lb://novel-admin
+          predicates:
+            - Path=/api/admin/**
+          filters:
+            - StripPrefix=1
+        - id: minio-image
+          uri: lb://minio-image
+          predicates:
+            - Path=/api/image/**
+          filters:
+            - StripPrefix=1
+        - id: novel-ai
+          uri: lb://novel-ai
+          predicates:
+            - Path=/api/ai/**
+          filters:
+            - StripPrefix=1
+        - id: novel-user
+          uri: lb://novel-user
+          predicates:
+            - Path=/api/user/**,/api/email/**
+          filters:
+            - StripPrefix=1
+```
+
+### 2. admin-system
+
+文件：`admin-system/src/main/resources/application.yaml`
+
+```yaml
+server:
+  port: 8006
+
+spring:
+  application:
+    name: admin-system-service
+  profiles:
+    active: local
+  config:
+    import:
+      - optional:nacos:admin-system-service-local.yaml?group=DEFAULT_GROUP&refresh-enabled=true
+  cloud:
+    nacos:
+      server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+      discovery:
+        namespace: ${NACOS_NAMESPACE:}
+        group: DEFAULT_GROUP
+      config:
+        namespace: ${NACOS_NAMESPACE:}
+        group: DEFAULT_GROUP
+        file-extension: yaml
+```
+
+Nacos Data ID：`admin-system-service-local.yaml`
+
+```yaml
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST:127.0.0.1}:${MYSQL_PORT:3306}/open_novel_admin?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+
+mybatis:
+  mapper-locations: classpath:Mapper/*.xml
+  type-aliases-package: com.kxhy.admin.domain
+  configuration:
+    map-underscore-to-camel-case: true
+
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true
+  support-methods-arguments: true
+
+jwt:
+  secret: ${JWT_SECRET}
+  expire-time: ${JWT_EXPIRE_TIME:86400000}
+
+admin:
+  user:
+    default-password: ${ADMIN_DEFAULT_PASSWORD:123456}
+```
+
+### 3. novel-admin
+
+文件：`novel-admin/src/main/resources/application.yaml`
+
+```yaml
+server:
+  port: 8000
+
+spring:
+  application:
+    name: novel-admin
+  profiles:
+    active: local
+  config:
+    import:
+      - optional:nacos:novel-admin-local.yaml?group=DEFAULT_GROUP&refresh-enabled=true
+  cloud:
+    nacos:
+      server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+      discovery:
+        namespace: ${NACOS_NAMESPACE:}
+        group: DEFAULT_GROUP
+      config:
+        namespace: ${NACOS_NAMESPACE:}
+        group: DEFAULT_GROUP
+        file-extension: yaml
+```
+
+Nacos Data ID：`novel-admin-local.yaml`
+
+```yaml
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST:127.0.0.1}:${MYSQL_PORT:3306}/open_novel_content?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+
+mybatis:
+  mapper-locations: classpath:Mapper/*.xml
+  type-aliases-package: com.kxhy.domain
+  configuration:
+    map-underscore-to-camel-case: true
+
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true
+  support-methods-arguments: true
+
+jwt:
+  secret: ${JWT_SECRET}
+  expire-time: ${JWT_EXPIRE_TIME:86400000}
+
+admin-system:
+  base-url: http://admin-system-service
+
+comfyui:
+  base-url: ${COMFYUI_BASE_URL:http://127.0.0.1:8188}
+  workflow-path: ${COMFYUI_WORKFLOW_PATH:}
+  checkpoint-name: ${COMFYUI_CHECKPOINT_NAME:}
+  width: 832
+  height: 1216
+  steps: 30
+  cfg: 5.0
+  sampler-name: dpm_2
+  scheduler: normal
+  timeout-seconds: 300
+  poll-interval-millis: 1000
+```
+
+### 4. minio-image
+
+文件：`minio-image/src/main/resources/application.yaml`
+
+```yaml
+server:
+  port: 8001
+
+spring:
+  application:
+    name: minio-image
+  profiles:
+    active: local
+  config:
+    import:
+      - optional:nacos:novel-minio-local.yaml?group=DEFAULT_GROUP&refresh-enabled=true
+  cloud:
+    nacos:
+      server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+      discovery:
+        namespace: ${NACOS_NAMESPACE:}
+        group: DEFAULT_GROUP
+      config:
+        namespace: ${NACOS_NAMESPACE:}
+        group: DEFAULT_GROUP
+        file-extension: yaml
+```
+
+Nacos Data ID：`novel-minio-local.yaml`
+
+```yaml
+minio:
+  endpoint: ${MINIO_ENDPOINT:http://127.0.0.1:9000}
+  access-key: ${MINIO_ACCESS_KEY}
+  secret-key: ${MINIO_SECRET_KEY}
+  bucket-name: ${MINIO_BUCKET_NAME:open-novel}
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+```
+
+### 5. novel-AI
+
+文件：`novel-AI/src/main/resources/application.yaml`
+
+```yaml
+server:
+  port: 8002
+
+spring:
+  application:
+    name: novel-ai
+  profiles:
+    active: local
+  config:
+    import:
+      - optional:nacos:novel-ai-local.yaml?group=DEFAULT_GROUP&refresh-enabled=true
+  cloud:
+    nacos:
+      server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+      discovery:
+        namespace: ${NACOS_NAMESPACE:}
+        group: DEFAULT_GROUP
+      config:
+        namespace: ${NACOS_NAMESPACE:}
+        group: DEFAULT_GROUP
+        file-extension: yaml
+```
+
+Nacos Data ID：`novel-ai-local.yaml`
+
+```yaml
+ollama:
+  base-url: ${OLLAMA_BASE_URL:http://127.0.0.1:11434}
+  model: ${OLLAMA_MODEL:qwen2.5:7b}
+```
+
+### 6. novel-user
+
+文件：`novel-user/src/main/resources/application.yml`
+
+```yaml
+server:
+  port: 8003
+
+spring:
+  application:
+    name: novel-user
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST:127.0.0.1}:${MYSQL_PORT:3306}/novel_user?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+  data:
+    redis:
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:6379}
+      database: ${REDIS_DATABASE:0}
+      timeout: 5000
+  cloud:
+    nacos:
+      server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+
+sa-token:
+  token-name: satoken
+  timeout: 2592000
+  active-timeout: -1
+  is-concurrent: true
+  is-share: false
+  token-style: uuid
+  is-log: true
+
+app:
+  email:
+    smtp:
+      host: ${EMAIL_SMTP_HOST}
+      port: ${EMAIL_SMTP_PORT:465}
+      ssl-enabled: ${EMAIL_SMTP_SSL_ENABLED:true}
+      from-email: ${APP_EMAIL_FROM}
+      auth-code: ${APP_EMAIL_AUTH_CODE}
+      connection-timeout: 10000
+      timeout: 15000
+    pool:
+      max-total: 10
+      max-idle: 5
+      min-idle: 2
+      max-wait-millis: 3000
+      test-on-borrow: true
+      test-while-idle: true
+    retry:
+      max-attempts: 3
+      backoff-delay: 1000
+      multiplier: 2.0
+    template:
+      verification-code: verification-email.ftl
+    monitor:
+      enabled: true
+      metrics-prefix: email
+
+mybatis:
+  type-aliases-package: com.kxhy.novel.domain.po
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
+resilience4j:
+  ratelimiter:
+    instances:
+      user-register:
+        limit-for-period: 5
+        limit-refresh-period: 10s
+        timeout-duration: 0
+        register-health-indicator: true
+      user-login:
+        limit-for-period: 10
+        limit-refresh-period: 60s
+        timeout-duration: 0
+        register-health-indicator: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,ratelimiters
+  endpoint:
+    health:
+      show-details: always
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    enabled: true
+    try-it-out-enabled: true
+  packages-to-scan: com.kxh.novel.controller
+  paths-to-match: /**
+
+logging:
+  pattern:
+    level: "%5p [%X{requestId}]"
+  file:
+    name: logs/novel-app.log
+```
+
+### 环境变量参考
+
+| 变量                                                         | 用途                                  |
+| ------------------------------------------------------------ | ------------------------------------- |
+| `NACOS_SERVER_ADDR`                                          | Nacos 地址，例如 `127.0.0.1:8848`     |
+| `NACOS_NAMESPACE`                                            | Nacos namespace，本地不分环境可以留空 |
+| `MYSQL_HOST` / `MYSQL_PORT`                                  | MySQL 地址和端口                      |
+| `MYSQL_USERNAME` / `MYSQL_PASSWORD`                          | MySQL 账号和密码                      |
+| `REDIS_HOST` / `REDIS_PORT` / `REDIS_DATABASE`               | Redis 配置                            |
+| `JWT_SECRET` / `JWT_EXPIRE_TIME`                             | 后台 JWT 密钥和过期时间               |
+| `MINIO_ENDPOINT` / `MINIO_ACCESS_KEY` / `MINIO_SECRET_KEY` / `MINIO_BUCKET_NAME` | MinIO 配置                            |
+| `OLLAMA_BASE_URL` / `OLLAMA_MODEL`                           | Ollama 地址和模型                     |
+| `EMAIL_SMTP_HOST` / `APP_EMAIL_FROM` / `APP_EMAIL_AUTH_CODE` | 邮箱服务配置                          |
+
+## 安全说明
+
+仓库里不要提交这些内容：
+
+* 本地配置文件和 `.env`
+* MySQL、Redis、MinIO、邮箱、JWT 的真实密钥
+* 日志文件、上传文件、缓存目录
+* `target/`、`build/`、IDE 配置和临时文件
+* 数据库备份和压缩包
+
+`.gitignore` 已经覆盖了常见本地配置和构建产物。如果要分享配置，优先写成脱敏后的示例。
+
+## 暂未提交的目录
+
+当前公开仓库没有提交下面两个规划中或重构中的模块：
 
 ```text
 novel-metadata
 novel-novel
 ```
 
-这两个模块属于后续规划或重构中模块，暂未纳入当前公开版本。
-
----
-
-## 安全说明
-
-仓库中不提交以下内容：
-
-* 本地配置文件
-* 数据库真实密码
-* JWT secret
-* MinIO 密钥
-* 邮箱授权码
-* 日志文件
-* target 编译产物
-* IDE 配置文件
-* 本地上传文件
-
-如果需要运行项目，请自行准备对应配置。
-
----
-
 ## 后续计划
 
-* 补充数据库初始化 SQL
-* 补充接口文档
-* 补充 Postman Collection
-* 完善 Docker Compose 启动方式
-* 完善前台小说展示服务
-* 完善小说元数据服务
-* 增加权限缓存
-* 增加 token 失效机制
-* 增加服务间鉴权
+* 补数据库初始化 SQL
+* 补接口文档和 Postman Collection
+* 补 Docker Compose 本地启动环境
+* 完善前台小说展示和小说元数据服务
+* 增加权限缓存、token 失效机制和服务间鉴权
 * 增加测试用例
-
----
 
 ## License
 
