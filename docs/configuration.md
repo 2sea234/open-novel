@@ -17,16 +17,16 @@
 
 常见配置包括：
 
-| 配置项                   | 说明               |
-| --------------------- | ---------------- |
-| `MYSQL_USERNAME`      | MySQL 用户名        |
-| `MYSQL_PASSWORD`      | MySQL 密码         |
-| `JWT_SECRET`          | JWT 签名密钥         |
-| `MINIO_ENDPOINT`      | MinIO 服务地址       |
-| `MINIO_ACCESS_KEY`    | MinIO Access Key |
-| `MINIO_SECRET_KEY`    | MinIO Secret Key |
-| `APP_EMAIL_AUTH_CODE` | 邮箱授权码            |
-| `OLLAMA_BASE_URL`     | Ollama / AI 服务地址 |
+| 配置项 | 说明 |
+|---|---|
+| `MYSQL_USERNAME` | MySQL 用户名 |
+| `MYSQL_PASSWORD` | MySQL 密码 |
+| `JWT_SECRET` | JWT 签名密钥 |
+| `MINIO_ENDPOINT` | MinIO 服务地址 |
+| `MINIO_ACCESS_KEY` | MinIO Access Key |
+| `MINIO_SECRET_KEY` | MinIO Secret Key |
+| `APP_EMAIL_AUTH_CODE` | 邮箱授权码 |
+| `OLLAMA_BASE_URL` | Ollama / AI 服务地址 |
 
 ---
 
