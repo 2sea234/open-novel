@@ -1,5 +1,7 @@
 # OpenNovel
 
+![Java CI with Maven](https://github.com/2sea234/open-novel/actions/workflows/maven.yml/badge.svg)
+
 OpenNovel 是一个基于 Java / Spring Boot 的小说平台后端项目，采用多模块结构进行拆分，主要包含后台权限系统、小说后台管理、图片上传服务、AI 辅助服务、前台用户服务等模块。
 
 当前仓库主要用于保存 OpenNovel 后端代码与项目结构，部分本地配置、数据库脚本和仍在重构中的模块暂未提交。
